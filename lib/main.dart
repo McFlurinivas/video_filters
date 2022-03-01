@@ -3,12 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_color_filters/filters.dart';
+import 'package:video_filters/filters.dart';
 import 'dart:ui' as ui;
 import 'package:video_player/video_player.dart';
 import 'package:image_picker/image_picker.dart';
-//import 'package:gallery_saver/gallery_saver.dart';
-import 'package:flutter_color_filters/second_screen.dart';
+import 'package:tapioca/tapioca.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,6 +29,46 @@ class MyApp extends StatelessWidget {
   }
 }
 
+abstract class Filters extends TapiocaBall{
+  late String color;
+  Filters(Filter type) {
+    switch (type) {
+      case Filter.vivid:
+        this.color = "#0000FF";
+        break;
+      case Filter.noir:
+        this.color = "#000";
+        break;
+      case Filter.dramaticWarm:
+        this.color = "#EEEB8D";
+        break;
+      case Filter.mono:
+        this.color = "#909696";
+        break;
+    }
+  }
+  Filters.color(Color colorInstance) {
+    this.color = '#${colorInstance.value.toRadixString(16).substring(2)}';
+  }
+
+  Map<String, dynamic> toMap() {
+    return {'type': color };
+  }
+
+  String toTypeName() {
+    return 'Filter';
+  }
+}
+
+enum Filter {
+  vivid,
+  noir,
+  dramaticWarm,
+  mono
+}
+
+
+
 class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -44,16 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
     SWEET_MATRIX
   ];
 
-  /*void _saveNetworkVideo() async {
-    String path =
-        'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
-    GallerySaver.saveVideo(path).then((bool success) {
-      setState(() {
-        print('Video is saved');
-      });
-    });
-  }*/
-
+  final tapiocaBalls = [TapiocaBall.filter(Filter.mono)];
   File? _video;
   final _picker = ImagePicker();
   VideoPlayerController? controller;
@@ -93,6 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
 
+
     @override
     void dispose() {
       controller!.dispose();
@@ -107,7 +138,14 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         backgroundColor: Colors.deepOrange,
         actions: [
-          IconButton(icon: Icon(Icons.check), onPressed: (){}/*convertWidgetToImage*/)
+          IconButton(icon: Icon(Icons.check), onPressed: (){
+    final cup = Cup(Content(_video.path), tapiocaBalls);
+    cup.suckUp(path).then((_) async {
+      print("finished");
+      print(path);
+      GallerySaver.saveVideo(path).then((bool? success) {
+        print(success.toString());
+      });}/*convertWidgetToImage*/)
         ],
       ),
       body: SafeArea(
@@ -127,7 +165,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             itemCount: filters.length,
                             itemBuilder: (context, index) {
                               return ColorFiltered(
-                                colorFilter: ColorFilter.matrix(filters[index]),
+                                colorFilter: TapiocaBall.filter(Filters.pink),
                                 child: SizedBox(
                                     height: 200,
                                     width: double.infinity,
@@ -135,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         ? FittedBox(
                                             fit: BoxFit.cover,
                                             child: SizedBox(
-                                              height: 
+                                              height:
                                                   controller!.value.size.height,
                                               width:
                                                   controller!.value.size.width,

@@ -135,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         ? FittedBox(
                                             fit: BoxFit.cover,
                                             child: SizedBox(
-                                              height:
+                                              height: 
                                                   controller!.value.size.height,
                                               width:
                                                   controller!.value.size.width,
